@@ -133,7 +133,12 @@ def executar_inferencias(model, cpts):
         variables=['chol_binned'],
         evidence={'target': '1'} # Doença Confirmada
     )
-    prob3 = query3.get_value('chol_binned', 'High')
+    # Encontra a ordem dos estados (ex: ['Normal', 'Borderline', 'High'])
+    states_chol = list(query3.state_names['chol_binned'])
+    # Pega o índice do estado 'High'
+    index_chol_high = states_chol.index('High')
+    # Acessa o valor da probabilidade por esse índice
+    prob3 = query3.values[index_chol_high]
     print(f"3. P(Colesterol=Alto | Doença=Sim): {prob3:.4f}")
 
     # -----------------------------------------------------------
@@ -145,7 +150,12 @@ def executar_inferencias(model, cpts):
         variables=['oldpeak_binned'],
         evidence={'cp': '2', 'exang': '0'}
     )
-    prob4 = query4.get_value('oldpeak_binned', 'High')
+    # Encontra a ordem dos estados
+    states_oldpeak = list(query4.state_names['oldpeak_binned'])
+    # Pega o índice do estado 'High'
+    index_oldpeak_high = states_oldpeak.index('High')
+    # Acessa o valor da probabilidade por esse índice
+    prob4 = query4.values[index_oldpeak_high]
     print(f"4. P(oldpeak=High | cp=2, exang=0): {prob4:.4f}")
     
     print("\nAs 4 consultas foram realizadas com sucesso. Use estes valores no seu relatório.")
