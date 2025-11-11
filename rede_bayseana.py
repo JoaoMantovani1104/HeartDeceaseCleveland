@@ -41,7 +41,7 @@ def preparar_dados(df):
 
     discretized_vars = ['age_binned', 'trestbps_binned', 'chol_binned', 'thalach_binned', 'oldpeak_binned']
     categorical_vars = ['sex', 'cp', 'fbs', 'restecg', 'exang', 'ca', 'target']
-    df_final = df_model[categorical_vars + discretized_vars]
+    df_final = df_model[categorical_vars + discretized_vars].copy()
 
     for col in categorical_vars:
         df_final[col] = df_final[col].astype(str)
@@ -133,12 +133,7 @@ def executar_inferencias(model, cpts):
         variables=['chol_binned'],
         evidence={'target': '1'} # Doença Confirmada
     )
-    # Encontra a ordem dos estados (ex: ['Normal', 'Borderline', 'High'])
-    states_chol = list(query3.state_names['chol_binned'])
-    # Pega o índice do estado 'High'
-    index_chol_high = states_chol.index('High')
-    # Acessa o valor da probabilidade por esse índice
-    prob3 = query3.values[index_chol_high]
+    prob3 = query3.get_value(chol_binned='High')
     print(f"3. P(Colesterol=Alto | Doença=Sim): {prob3:.4f}")
 
     # -----------------------------------------------------------
@@ -150,12 +145,7 @@ def executar_inferencias(model, cpts):
         variables=['oldpeak_binned'],
         evidence={'cp': '2', 'exang': '0'}
     )
-    # Encontra a ordem dos estados
-    states_oldpeak = list(query4.state_names['oldpeak_binned'])
-    # Pega o índice do estado 'High'
-    index_oldpeak_high = states_oldpeak.index('High')
-    # Acessa o valor da probabilidade por esse índice
-    prob4 = query4.values[index_oldpeak_high]
+    prob4 = query4.get_value(oldpeak_binned='High')
     print(f"4. P(oldpeak=High | cp=2, exang=0): {prob4:.4f}")
     
     print("\nAs 4 consultas foram realizadas com sucesso. Use estes valores no seu relatório.")
@@ -182,6 +172,13 @@ if __name__ == '__main__':
     
     # 3. Calcular e Armazenar TODAS as CPTs
     all_cpts = calcular_todas_cpts(model_fitted)
+
+    # Print de todos as CPTs
+    for node, cpd in all_cpts.items():
+        print(f"\n--- CPT para o nó: {node} ---")
+        print(cpd)
+        print("-" * 30)
+
     print(f"Total de {len(all_cpts)} CPTs calculadas e armazenadas.")
     
     # --- INÍCIO DA FASE 3: INFERÊNCIA ---
